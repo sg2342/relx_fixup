@@ -1,0 +1,12 @@
+{application, relx_fixup,
+ [{description, "remove stuff from relx"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {applications,
+   [kernel,
+    stdlib
+   ]},
+  {env,[]},
+  {modules, []},
+  {links, []}
+ ]}.
