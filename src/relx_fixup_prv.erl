@@ -45,6 +45,7 @@ do({Name, Vsn}, State) ->
 			  [ "bin/erlexec"
 			  , "bin/beam.smp"
 			  , "bin/erl_child_setup"
+			  , "bin/epmd"
 			  , "bin/heart"]),
     ok = filter_erts(ErtsDir, ErtsWhiteList),
 

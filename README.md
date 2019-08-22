@@ -39,6 +39,7 @@ Config
    ,[  "bin/erlexec"
      , "bin/beam.smp"
      , "bin/erl_child_setup"
+     , "bin/epmd"
      , "bin/heart"]}
    {lib_rm_wildcards
    ,[ "include/*.hrl"
