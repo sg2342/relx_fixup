@@ -36,9 +36,18 @@ do1(true, false, State) ->
 
     %% obtain VSNs for all releases configured
     %% through the rexl config mangler
-    XS0 = rlx_state:new("", [], []),
-    {ok, XS} = lists:foldl(fun rlx_config:load_terms/2, {ok, XS0}, Releases),
-    ResolvedRs = ec_dictionary:keys(rlx_state:configured_releases(XS)),
+    ResolvedRs =
+	case rebar_version() >= "3.14" of
+	    true -> % relx >= 4.0.0
+		{ok, XS} = rlx_config:to_state(Releases),
+		maps:keys(rlx_state:configured_releases(XS));
+	    false -> % relx < 4.0.0
+		XS0 = rlx_state:new("", [], []),
+		{ok, XS} = lists:foldl(fun rlx_config:load_terms/2,
+				       {ok, XS0}, Releases),
+
+		ec_dictionary:keys(rlx_state:configured_releases(XS))
+	end,
 
     InstalledRs = lists:filter(
 		    fun ({Name, _Vsn}) ->
@@ -73,9 +82,13 @@ do2({Name, Vsn}, {ok, State}) ->
     LibDir = filename:join(RelDir, "lib"),
     filter_libs(LibDir, LibRmWildCards),
 
-    rebar_api:info("~p:  copy start.boot", [?PROVIDER]),
-    RDir = filename:join([RelDir, "releases", Vsn]),
-    copy_start_boot(RDir, Name),
+    case rebar_version() >= "3.14" of
+	true -> ok;
+	false ->
+	    rebar_api:info("~p:  copy start.boot", [?PROVIDER]),
+	    RDir = filename:join([RelDir, "releases", Vsn]),
+	    copy_start_boot(RDir, Name)
+    end,
     {ok, State};
 do2(_, R) -> R.
 
@@ -156,3 +169,7 @@ zap_empty_dirs_r(D) ->
 		_ -> ok
 	    end
     end.
+
+rebar_version() ->
+    {ok, Vsn} = application:get_key(rebar,vsn),
+    Vsn.
